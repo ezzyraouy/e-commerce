@@ -1,0 +1,88 @@
+
+@font-face {
+    font-family: perpetua;
+    src: url('../fonts/perpetua.ttf');
+  }
+  h1,h2,h3,h4,h5,h6 {
+    font-family: perpetua;
+  }
+.cont-product,.flat-spacing-20{
+    margin-top: 160px;
+    margin-bottom: 160px !important;
+}
+
+.cont-text{
+    margin-top: 160px;
+}
+footer .footer-logo img{
+    max-height: 45px !important;
+}
+.cont-two-article h4 {
+    font-size: 33px;
+    line-height: 30px;
+    width: 80%;
+    margin: auto;
+
+}
+.cont-two-article{
+    display: flex;
+    flex-direction: column;
+}
+.tf-mini-cart-remove{
+    cursor: pointer;
+}
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button {  
+
+   opacity: 1;
+
+}
+.card-product .cont-prix,
+.card-product .cont-prix:hover {
+    color: black !important;
+    padding: 18px;
+    border-radius: 3px;
+    /* box-shadow: 0 8px 24px rgba(149, 157, 165, 0.2) !important; */
+    /* background-color: rgb(242, 242, 242) !important; */
+    text-align: left;
+    display: flex !important;
+    align-items: center !important;
+    font-size: 16px;
+}
+
+.tf-btn-loading {
+    background-color: white;
+    padding-right: 15px;
+    padding-left: 15px;
+    opacity: 1;
+}
+.radio-cont{
+    display: flex;
+    border: 1px solid;
+    margin-bottom: 3px;
+    justify-content: center;
+}
+.item_size{
+    display: flex;
+    flex-direction: column;
+}
+.seemore {
+    margin-top: 30px;
+}
+.seemore a{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 20px;
+}
+.seemore a i{
+    font-size: 20px;
+}
+.list-product-btn .box-icon {
+    height: 47px;
+    font-size: small;
+}
+.tf-mini-search-frm button{
+    left: auto;
+    right: 14px;
+}
