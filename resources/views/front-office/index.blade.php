@@ -79,7 +79,7 @@
         </div>
     </div>
 </section> -->
-<section class="flat-spacing-1">
+{{--<section class="flat-spacing-1">
     <div class="container">
         <div class="wrapper-control-shop">
             <div class="meta-filter-shop"></div>
@@ -112,7 +112,7 @@
 
         </div>
     </div>
-</section>
+</section>--}}
 {{--<section class="cont-product">
     <div class="grid-layout wrapper-shop">
         @foreach($products as $product)      

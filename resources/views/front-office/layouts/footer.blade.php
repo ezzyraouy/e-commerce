@@ -353,12 +353,12 @@
                      </div>
                      <div class="tf-mini-cart-bottom">
                          <div class="tf-mini-cart-bottom-wrap">
-                             <div class="tf-cart-totals-discounts">
+                             <!-- <div class="tf-cart-totals-discounts">
                                  <div class="tf-cart-total">Subtotal</div>
                                  <div class="tf-totals-total-value fw-6 total_price" id="">0 <span class="currency">Dhs</span></div>
                              </div>
                              <div class="tf-cart-tax">Taxes and <a href="#">shipping</a> calculated at
-                                 checkout</div>
+                                 checkout</div> -->
                              <div class="tf-mini-cart-line"></div>
                              <div class="tf-mini-cart-view-checkout">
                                  <a href="{{ url('cart') }}"

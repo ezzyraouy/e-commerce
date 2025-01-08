@@ -72,8 +72,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
     <script>
-        $(document).ready(function() {
+        console.log(Cookies.get('cart'))
 
+        $(document).ready(function() {
             // Check for '.btnaddprod' and update its text
             if ($('.btnaddprod').length) {
                 $('.btnaddprod').each(function() {
@@ -81,121 +82,82 @@
                 });
             }
 
+            // Update Cart Modal
             window.updateCartModal = function() {
-                const cartItemsContainer = $('.tf-mini-cart-items');
-                if (!cartItemsContainer.length) return;
-
-                cartItemsContainer.html('');
-                let cart = JSON.parse(Cookies.get('cart') || '[]');
-
+                const cart = JSON.parse(Cookies.get('cart') || '[]'); // Get cart from cookies
                 // Update cart count
                 if ($('#cart-count').length) {
                     $('#cart-count').html(cart.length);
                 }
-
-                // Update total price
-                if ($('.total_price').length) {
-                    $('.total_price').html('0  <span class="currency">Dhs</span>');
-                }
-
-                // Update button text for items in the cart
-                cart.forEach(function(element) {
-                    const btn = $('#btnaddprod' + element);
-                    if (btn.length) {
-                        btn.text('Remove from Cart');
-                    }
-                });
-
-                if (cart.length === 0) {
-                    return;
-                }
-
                 $.ajax({
                     headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
                     },
                     url: "/get-cart-items",
                     type: "POST",
                     data: {
-                        cartItems: cart
+                        cartItems: cart,
                     },
                     success: function(response) {
+                        // console.log("Cart Items Response:", response); // Debug the response
                         let cartItemsHTML = '';
                         let total = 0;
+                        // Loop through the products in the response
+                        response.products.forEach(function(product) {
+                            // Retrieve the unit and quantity from the cart data
+                            const productCartData = cart.find(item => item.productId === product.id);
+                            const unitId = productCartData ? productCartData.unitId : ''; // Get unitId from cart data
+                            const quantity = productCartData ? productCartData.quantity : 1; // Default quantity to 1 if not found
+                            // console.log(productCartData);
 
-                        response.forEach(function(product) {
-                            const productImage = 'storage/' + product.image || '';
+                            // Find the unit from the units array based on the unitId
+                            const unit = response.units.find(unit => unit.id == unitId);
+                            console.log(response.units);
+                            // console.log(productCartData);
+
+                            // If unit is found, extract the unit name
+                            const unitName = unit ? unit.unit.name : '';
+
+                            const productImage = 'storage/' + (product.image || '');
                             const cartItemHTML = `
-                        <div class="tf-mini-cart-item" id="cart-item-${product.id}">
-                            <div class="tf-mini-cart-image">
-                                <a href="/product-detail/${product.slug}">
-                                    <img src="{{asset('${productImage}')}}" alt="${product.name}">
-                                </a>
-                            </div>
-                            <div class="tf-mini-cart-info">
-                                <a class="title link" href="/product-detail/${product.slug}">${product.name}</a>
-                                <div class="tf-mini-cart-btns">
-                                    <div class="wg-price">
-                                        ${product.price}  <span class="currency">Dhs</span>
-                                    </div>
-                                    <div class="tf-mini-cart-remove remove-from-cart" data-product-id="${product.id}"> Remove</div>
+                            <div class="tf-mini-cart-item" id="cart-item-${product.id}">
+                                <div class="tf-mini-cart-image">
+                                    <img style="max-height:80px" src="{{asset('${productImage}')}}" alt="${product.name}">
                                 </div>
-                            </div>
-                        </div>`;
+                                <div class="tf-mini-cart-info">
+                                    <a class="title link" href="/product-detail/${product.slug}">${product.name}</a>
+                                    <div class="tf-mini-cart-unit">
+                                        <span>Unit: ${unitName}</span> <!-- Display unit -->
+                                    </div>
+                                    <div class="tf-mini-cart-quantity">
+                                        <span>Quantity: ${quantity}</span> <!-- Display quantity -->
+                                    </div>
+                                    <div class="tf-mini-cart-btns">
+                                        <div class="tf-mini-cart-remove remove-from-cart" data-product-id="${product.id}">Remove</div>
+                                    </div>
+                                </div>
+                            </div>`;
                             cartItemsHTML += cartItemHTML;
-                            total += parseFloat(product.price);
+                            total += product.price * quantity; // Add product total to the cart total
                         });
 
-                        if (cartItemsHTML && cartItemsContainer.length) {
-                            cartItemsContainer.html(cartItemsHTML);
-                        } else {
-                            if (cartItemsContainer.length) {
-                                cartItemsContainer.html('<p>No items in the cart.</p>');
-                            }
+                        // Update the cart items in the modal
+                        if (cartItemsHTML && $('.tf-mini-cart-items').length) {
+                            $('.tf-mini-cart-items').html(cartItemsHTML);
                         }
 
-                        if ($('.total_price').length) {
-                            $('.total_price').html(total + '  <span class="currency">Dhs</span>');
-                        }
-                        if ($('#total_amount').length) {
-                            $('#total_amount').val(total);
-                        }
+                        // Update the total price in the modal
+                        $('.total_price').html(total + ' <span class="currency">Dhs</span>');
                     },
                     error: function(xhr, status, error) {
                         console.error("Error fetching cart items:", status, error);
-                    }
+                    },
                 });
-            }
+            };
 
-            window.toggleCart = function(productId) {
-                let cart = JSON.parse(Cookies.get('cart') || '[]');
-                const index = cart.indexOf(productId);
-                const btn = $('#btnaddprod' + productId);
 
-                if (index === -1) {
-                    if (btn.length) {
-                        btn.text('Remove from Cart');
-                    }
-                    cart.push(productId);
-                    Cookies.set('cart', JSON.stringify(cart.filter(item => item !== null)), {
-                        path: '/'
-                    });
-                    updateCartModal();
-                    if ($('#shoppingCart').length) {
-                        $('#shoppingCart').modal('show');
-                    }
-                } else {
-                    if (btn.length) {
-                        btn.text('Quick Add to Cart');
-                    }
-                    cart.splice(index, 1);
-                    Cookies.set('cart', JSON.stringify(cart), {
-                        path: '/'
-                    });
-                    updateCartModal();
-                }
-            }
 
+            // Remove from Cart
             window.removeFromCart = function(productId) {
                 let cart = JSON.parse(Cookies.get('cart') || '[]');
                 const index = cart.indexOf(productId);
@@ -206,30 +168,30 @@
 
                 cart.splice(index, 1);
                 Cookies.set('cart', JSON.stringify(cart), {
-                    path: '/'
+                    path: '/',
                 });
-                updateCartModal();
-                updateCart()
-            }
+                location.reload();
+            };
 
+            // Update Wishlist Count
             window.updateCount = function() {
                 const wishlist = JSON.parse(Cookies.get('wishlist') || '[]');
 
                 if ($('.wishlist-btn').length) {
                     $('.wishlist-btn').each(function() {
-                        const productId = $(this).data('product-id'); // Get the product ID from data attribute
-                        const tooltipText = $(this).find('.tooltip'); // Find the tooltip element
-                        const heartIcon = $(this).find('.icon-heart'); // Find the heart icon
-                        const deleteIcon = $(this).find('.icon-delete'); // Find the delete icon
+                        const productId = $(this).data('product-id');
+                        const tooltipText = $(this).find('.tooltip');
+                        const heartIcon = $(this).find('.icon-heart');
+                        const deleteIcon = $(this).find('.icon-delete');
 
                         if (wishlist.includes(productId)) {
-                            tooltipText.text('Remove from Wishlist'); // Set text if product is in wishlist
-                            heartIcon.hide(); // Hide heart icon
-                            deleteIcon.show(); // Show delete icon
+                            tooltipText.text('Remove from Wishlist');
+                            heartIcon.hide();
+                            deleteIcon.show();
                         } else {
-                            tooltipText.text('Add to Wishlist'); // Set default text
-                            heartIcon.show(); // Show heart icon
-                            deleteIcon.hide(); // Hide delete icon
+                            tooltipText.text('Add to Wishlist');
+                            heartIcon.show();
+                            deleteIcon.hide();
                         }
                     });
                 }
@@ -238,8 +200,9 @@
                 if (wishlistCountElement.length) {
                     wishlistCountElement.text(wishlist.length);
                 }
-            }
+            };
 
+            // Toggle Wishlist
             window.toggleWishlist = function(productId) {
                 const wishlistBtn = $('#wishlist-btn-' + productId);
                 const tooltipText = wishlistBtn.find('.tooltip');
@@ -250,29 +213,71 @@
                 if (index === -1) {
                     wishlist.push(productId);
                     Cookies.set('wishlist', JSON.stringify(wishlist.filter(item => item !== null)), {
-                        path: '/'
+                        path: '/',
                     });
                     tooltipText.text('Remove from Wishlist');
                 } else {
                     wishlist.splice(index, 1);
                     Cookies.set('wishlist', JSON.stringify(wishlist), {
-                        path: '/'
+                        path: '/',
                     });
                     tooltipText.text('Add to Wishlist');
                 }
 
                 updateCount();
-            }
+            };
 
-            // Event handlers
+            // Toggle Cart
+            window.toggleCart = function(productId, unitId, quantity) {
+                let cart = JSON.parse(Cookies.get('cart') || '[]');
+                const cartItemIndex = cart.findIndex(item => item.productId === productId && item.unitId === unitId);
+                const btn = $('#btnaddprod' + productId);
+                console.log(cart);
+                if (cartItemIndex === -1) {
+                    if (btn.length) {
+                        btn.text('Remove from Cart');
+                    }
+                    cart.push({
+                        productId,
+                        unitId,
+                        quantity,
+                    });
+                    Cookies.set('cart', JSON.stringify(cart), {
+                        path: '/',
+                    });
+                    updateCartModal();
+                    if ($('#shoppingCart').length) {
+                        $('#shoppingCart').modal('show');
+                    }
+                } else {
+                    if (btn.length) {
+                        btn.text('Quick Add to Cart');
+                    }
+                    cart.splice(cartItemIndex, 1);
+                    Cookies.set('cart', JSON.stringify(cart), {
+                        path: '/',
+                    });
+                    location.reload();
+                }
+            };
+
+            // Event Handlers
             $(document).on('click', '.toggle-cart', function() {
                 const productId = $(this).data('product-id');
-                toggleCart(productId);
+                const unitId = $(`#unit-${productId}`).val();
+                const quantity = $(`#quantity-${productId}`).val();
+
+                if (!unitId || !quantity || quantity <= 0) {
+                    alert('Please select a unit and enter a valid quantity.');
+                    return;
+                }
+
+                toggleCart(productId, unitId, quantity);
             });
+
             $(document).on('click', '.remove-from-cart', function() {
                 const productId = $(this).data('product-id');
                 removeFromCart(productId);
-                // getcart()
             });
 
             $(document).on('click', '.wishlist-btn', function() {
@@ -280,21 +285,16 @@
                 toggleWishlist(productId);
             });
 
-            // Initial updates
+            // Initial Updates
             updateCartModal();
             updateCount();
 
-            //register
-
-        });
-        $(document).ready(function() {
+            // Register Form Submission
             $('#register-form').on('submit', function(e) {
-                e.preventDefault(); // Prevent the form from submitting the normal way
+                e.preventDefault();
 
-                // Clear any existing alerts
                 $('#alert-placeholder').html('');
 
-                // Gather form data
                 const formData = {
                     name: $('#name').val(),
                     email: $('#email').val(),
@@ -302,149 +302,45 @@
                     address: $('#address').val(),
                     password: $('#password').val(),
                     password_confirmation: $('#password-confirm').val(),
-                    _token: '{{ csrf_token() }}' // Include CSRF token
+                    _token: '{{ csrf_token() }}',
                 };
 
-                // Send AJAX request
                 $.ajax({
                     headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
                     },
                     type: 'POST',
-                    url: '{{ route("registerFront") }}', // Laravel route for registration
+                    url: '{{ route("registerFront") }}',
                     data: formData,
                     success: function(response) {
-                        // Handle success (you can redirect or display a success message)
-                        Cookies.set('user_id', response.user.id)
+                        Cookies.set('user_id', response.user.id);
                         location.reload();
-                        // $("#register .icon-close-popup").click()
-                        // $(document).ready(function() {
-                        //     // Append success alert message to the alert-login container
-                        //     $(".alert-login").append(`
-                        //         <div class="alert alert-success" role="alert">
-                        //             You have successfully logged in! You can now check out.
-                        //         </div>
-                        //     `);
-
-                        //     // Update the cart checkout button
-                        //     $("#btn-checkout").removeAttr('data-bs-toggle').attr('href', '#');
-                        //     $("#btn-checkout span").text('Checkout')
-                        //     updateMenuToLogout();
-                        // });
-                        // alert('Registration successful');
                     },
-                    error: function(xhr, status, error) {
-                        // Handle errors (display validation errors, etc.)
+                    error: function(xhr) {
                         let errors = xhr.responseJSON.errors;
                         if (errors) {
                             let errorMessages = '<div class="alert alert-danger alert-dismissible fade show" role="alert">';
                             errorMessages += '<ul>';
-
                             $.each(errors, function(key, value) {
-                                errorMessages += '<li>' + value[0] + '</li>'; // Show each error in a list
+                                errorMessages += '<li>' + value[0] + '</li>';
                             });
-
                             errorMessages += '</ul>';
                             errorMessages += '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
                             errorMessages += '</div>';
-
-                            // Insert the Bootstrap alert with error messages into the placeholder
                             $('#alert-placeholder').html(errorMessages);
                         } else {
-                            // Generic error handling
                             let genericError = '<div class="alert alert-danger alert-dismissible fade show" role="alert">';
                             genericError += 'An error occurred, please try again.';
                             genericError += '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
                             genericError += '</div>';
-
                             $('#alert-placeholder').html(genericError);
                         }
-                    }
+                    },
                 });
             });
-            $('#login-form').on('submit', function(e) {
-                e.preventDefault(); // Prevent the form from submitting the normal way
-
-                // Clear any existing alerts
-                $('#alert-placeholder-login').html('');
-
-                // Gather form data
-                const formData = {
-                    email: $('#email-login').val(),
-                    password: $('#password-login').val(),
-                    _token: '{{ csrf_token() }}' // Include CSRF token
-                };
-
-                // Send AJAX request
-                $.ajax({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    type: 'POST',
-                    url: '{{ route("loginFront") }}', // Laravel route for registration
-                    data: formData,
-                    success: function(response) {
-                        // Handle success (you can redirect or display a success message)
-                        Cookies.set('user_id', response.user.id)
-                        location.reload();
-                        // console.log(response.user.id)
-                        // $("#login .icon-close-popup").click()
-                        // $(document).ready(function() {
-                        //     // Append success alert message to the alert-login container
-                        //     $(".alert-login").append(`
-                        //         <div class="alert alert-success" role="alert">
-                        //             You have successfully logged in! You can now check out.
-                        //         </div>
-                        //     `);
-
-                        //     // Update the cart checkout button
-                        //     $("#btn-checkout").removeAttr('data-bs-toggle').attr('href', '#');
-                        //     $("#btn-checkout span").text('Checkout')
-                        //     updateMenuToLogout();
-                        // });
-                    },
-                    error: function(xhr, status, error) {
-                        // Handle errors (display validation errors, etc.)
-                        let errors = xhr.responseJSON.errors;
-                        if (errors) {
-                            let errorMessages = '<div class="alert alert-danger alert-dismissible fade show" role="alert">';
-                            errorMessages += '<ul>';
-
-                            $.each(errors, function(key, value) {
-                                errorMessages += '<li>' + value[0] + '</li>'; // Show each error in a list
-                            });
-
-                            errorMessages += '</ul>';
-                            errorMessages += '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
-                            errorMessages += '</div>';
-
-                            // Insert the Bootstrap alert with error messages into the placeholder
-                            $('#alert-placeholder-login').html(errorMessages);
-                        } else {
-                            // Generic error handling
-                            let genericError = '<div class="alert alert-danger alert-dismissible fade show" role="alert">';
-                            genericError += 'An error occurred, please try again.';
-                            genericError += '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
-                            genericError += '</div>';
-
-                            $('#alert-placeholder-login').html(genericError);
-                        }
-                    }
-                });
-            });
-
-            function updateMenuToLogout() {
-                $(".nav-account").html(`
-                    <form method="POST" action="{{ route('logout') }}" id="logout-form">
-                        @csrf
-                        <button type="submit" class="nav-icon-item btn btn-link" style="border: none; background: none;">
-                            <i class="icon icon-account"></i> Logout
-                        </button>
-                    </form>
-                `);
-            }
         });
     </script>
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
     <!-- Toastr JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>

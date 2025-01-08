@@ -36,36 +36,75 @@
 </section>
 <section class="flat-spacing-1 pt-2">
     <div class="container">
-        <div class="wrapper-control-shop">
+        <div class="grid-layout" data-grid="grid-list">
+            @foreach($products as $product)
+            <div class="card-product list-layout">
+                <div class="card-product-wrapper">
+                    <a href="#" class="product-img">
+                        <img class="lazyload img-product" data-src="{{ asset('storage/'.$product->image) }}" src="{{ asset('storage/'.$product->image) }}" alt="image-product">
+                        <img class="lazyload img-hover" data-src="{{ asset('storage/'.$product->image) }}" src="{{ asset('storage/'.$product->image) }}" alt="image-product">
+                    </a>
+                </div>
+                <div class="card-product-info">
+                    <a href="#" class="title link">{{ $product->name }}</a>
+                    <p class="description">{{ $product->description }}</p>
+
+                    <!-- Unit Dropdown -->
+                    <label for="unit-{{ $product->id }}">Choose Unit:</label>
+                    <select id="unit-{{ $product->id }}" class="form-select">
+                        <option value="" disabled selected>Select a unit</option>
+                        @foreach($product->unitProducts as $unitProduct)
+                        <option value="{{ $unitProduct->id }}">
+                            {{ $unitProduct->unit->name }} ({{ $unitProduct->price }} per unit)
+                        </option>
+                        @endforeach
+                    </select>
+
+                    <!-- Quantity Input -->
+                    <label for="quantity-{{ $product->id }}">Quantity:</label>
+                    <input type="number" id="quantity-{{ $product->id }}" class="form-control" min="1">
+
+                    <!-- Add/Remove Button -->
+                    <div class="list-product-btn absolute-2">
+                        <p data-product-id="{{ $product->id }}" class="box-icon d-flex flex-column align-items-center w-auto quickview tf-btn-loading toggle-cart">
+                            <span id="btnaddprod{{ $product->id }}" class="btnaddprod">Quick Add to Cart</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+
+        </div>
+        {{--<div class="wrapper-control-shop">
             <div class="meta-filter-shop"></div>
             <div class="grid-layout wrapper-shop" data-grid="grid-4">
                 @foreach($products as $product)
                 <div class="card-product" data-price="16.95" data-color="orange black white">
                     <div class="card-product-wrapper">
                         <a href="{{'/product-detail/'.$product->slug}}" class="product-img">
-                            <img class="img-product ls-is-cached lazyloaded" data-src="{{ asset('storage/'.$product->image) }}" src="{{ asset('storage/'.$product->image) }}" alt="image-product">
-                            <img class="img-hover ls-is-cached lazyloaded" data-src="{{ asset('storage/'.$product->image) }}" src="{{ asset('storage/'.$product->image) }}" alt="image-product">
-                        </a>
-                        <div class="list-product-btn absolute-2">
-                            <p data-product-id="{{ $product->id }}" class="box-icon d-flex flex-column align-items-center w-auto quickview tf-btn-loading toggle-cart">
-                                <span id="btnaddprod{{ $product->id }}" class="btnaddprod">
-                                    <!-- Optionally add content here -->
-                                </span>
-                            </p>
-                            <a data-product-id="{{ $product->id }}" href="/product-detail/{{$product->slug }}" class="box-icon d-flex flex-column align-items-center w-auto quickview tf-btn-loading">
+        <img class="img-product ls-is-cached lazyloaded" data-src="{{ asset('storage/'.$product->image) }}" src="{{ asset('storage/'.$product->image) }}" alt="image-product">
+        <img class="img-hover ls-is-cached lazyloaded" data-src="{{ asset('storage/'.$product->image) }}" src="{{ asset('storage/'.$product->image) }}" alt="image-product">
+        </a>
+        <div class="list-product-btn absolute-2">
+            <p data-product-id="{{ $product->id }}" class="box-icon d-flex flex-column align-items-center w-auto quickview tf-btn-loading toggle-cart">
+                <span id="btnaddprod{{ $product->id }}" class="btnaddprod">
+                    <!-- Optionally add content here -->
+                </span>
+            </p>
+            <!-- <a data-product-id="{{ $product->id }}" href="/product-detail/{{$product->slug }}" class="box-icon d-flex flex-column align-items-center w-auto quickview tf-btn-loading">
                                 Shop
-                            </a>
-                        </div>
-                    </div>
-                    <div class="card-product-info">
-                        <span>{{ $product->name }}</span>
-                        <span>{{ $product->price }} <span class="currency">Dhs</span></span>
-                    </div>
-                </div>
-                @endforeach
-            </div>
-
+                            </a> -->
         </div>
+    </div>
+    <div class="card-product-info">
+        <span>{{ $product->name }}</span>
+        <span>{{ $product->price }} <span class="currency">Dhs</span></span>
+    </div>
+    </div>
+    @endforeach
+    </div>
+
+    </div>--}}
     </div>
 </section>
 {{--<section class="flat-spacing-2">

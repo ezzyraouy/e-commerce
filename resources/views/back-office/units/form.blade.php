@@ -10,11 +10,11 @@
         <input class="mb-10" type="text" placeholder="Enter title" name="name" tabindex="0" value="{{ old('name', $unit->name ?? '') }}" aria-required="true">
         <div class="text-tiny text-surface-2">Do not exceed 20 characters when entering the unit name.</div>
     </fieldset>
-
+<!-- 
     <fieldset class="quantity">
         <div class="body-title mb-10">quantity <span class="tf-color-1">*</span></div>
         <input class="" type="number" placeholder="quantity" name="quantity" tabindex="0" value="{{ old('quantity', $unit->quantity ?? '') }}" aria-required="true">
-    </fieldset>
+    </fieldset> -->
     
 
 </div>

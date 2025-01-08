@@ -17,10 +17,10 @@
                         <thead>
                             <tr>
                                 <th>Product</th>
-                                <th>Price</th>
                                 <th>Quantity</th>
+                                <th>Unit</th>
                                 <!-- <th>Size</th> -->
-                                <th>Total</th>
+                                <th>Action</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -29,10 +29,10 @@
 
                         </tbody>
                     </table>
-                    <div class="tf-page-cart-note">
+                    <!-- <div class="tf-page-cart-note">
                         <label for="cart-note">Add Order Note</label>
                         <textarea name="note" id="cart-note" placeholder="How can we help you?"></textarea>
-                    </div>
+                    </div> -->
                 </form>
             </div>
             <div class="tf-page-cart-footer">
@@ -54,11 +54,11 @@
                     <div class="tf-page-cart-checkout">
 
 
-                        <div class="tf-cart-totals-discounts">
+                        <!-- <div class="tf-cart-totals-discounts">
                             <h3>Subtotal</h3>
 
                             <span class="total-value total_price"></span>
-                        </div>
+                        </div> -->
 
                         <!-- <p class="tf-cart-tax">
                             Taxes and <a href="shipping-delivery.html">shipping</a> calculated at checkout
@@ -114,102 +114,93 @@ session()->forget('success');
 <script>
     $(document).ready(function() {
         window.updateCart = function() {
+            const cart = JSON.parse(Cookies.get('cart') || '[]'); // Get cart from cookies
 
-            const cartItemsContainer = $('.cart-items');
-            const emptyMessage = $('#empty');
-            const cartpacked = $('#cart-packed');
+            const emptyMessage = $('#empty'); // Assuming you have a container for the empty message
+            const cartpacked = $('#cart-packed'); // Assuming you have a container for the cart
 
-            cartItemsContainer.empty(); // Clear container
-            let cart = JSON.parse(Cookies.get('cart') || '[]'); // Get cart from cookies
             if (cart.length > 0) {
-                emptyMessage.hide()
-                cartpacked.show()
+                emptyMessage.hide(); // Hide the empty cart message
+                cartpacked.show(); // Show the cart content
             } else {
-                emptyMessage.show()
-                cartpacked.hide()
-                return;
+                emptyMessage.show(); // Show the empty cart message
+                cartpacked.hide(); // Hide the cart content
+                return; // Exit the function if cart is empty
             }
-            $('#cart-count').html(cart.length); // Update cart count
 
-            // Send the AJAX request with the cart items
+            // Update cart count
+            if ($('#cart-count').length) {
+                $('#cart-count').html(cart.length);
+            }
+
             $.ajax({
                 headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') // Include CSRF token for security
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
                 },
                 url: "/get-cart-items",
                 type: "POST",
                 data: {
-                    cartItems: cart // Send cart items
+                    cartItems: cart,
                 },
                 success: function(response) {
-                    let cartItemsHTML = ''; // String to store HTML for cart items
+                    let cartItemsHTML = '';
 
-                    if (response.length === 0) {
-                        emptyMessage.text("No items found in the cart."); // If no items are returned
-                    } else {
-                        $.each(response, function(index, product) {
-                            const sizesArray = product.sizes ? product.sizes.split(',') : [];
-                            let sizeOptionsHTML = '';
-                            if (sizesArray.length > 0) {
-                                sizesArray.forEach((size, i) => {
-                                    sizeOptionsHTML += `
-                                        <div class="fieldset-radio mb_20 d-flex">
-                                            <input type="radio" id="size-${size.trim()}" class="tf-check me-2" name="size-${product.id}" value="${size.trim()}" ${i === 0 ? 'checked' : ''}>
-                                            <label for="size-${size.trim()}">${size.trim()}</label>
-                                        </div>
-                                    `;
-                                });
-                            } else {
-                                sizeOptionsHTML = '<a href="#find_size" class="tf-btn btn-sm radius-3 btn-fill btn-icon animate-hover-btn" data-bs-toggle="modal">Made to Measure<a>'; // Fallback text if no sizes
-                            }
-                            const productImage = product.image ? `storage/${product.image}` : 'default-image-path.jpg'; // Handle missing image
-                            const cartItemHTML = `
-                            
-                            <tr class="tf-cart-item file-delete cart-item-checkout" id="cart-item-${product.id}"  data-product-id="${product.id}">
-                                <td class="tf-cart-item_product">
-                                    <a href="/product-detail/${product.slug}" class="img-box">
-                                        <img src="{{asset('${productImage}')}}" alt="${product.name}">
-                                    </a>
-                                    <div class="cart-info">
-                                        <a href="/product-detail/${product.id}" class="cart-title link">${product.name}</a>
-                                    </div>
-                                </td>
-                                <td class="tf-cart-item_price" cart-data-title="Price">
-                                     <input type="hidden" id='price-${product.id}' value="${product.price}">
-                                    <div class="cart-price">${product.price}  </div>
-                                </td>
-                                <td class="tf-cart-item_quantity" cart-data-title="Quantity">
-                                    <div class="item_quantity d-flex justify-content-center">
-                                        <input type="number" name="number" id="quantity-${product.id}" min="1" class="w-50 text-center" data-product-id="${product.id}" value="1">
-                                    </div>
-                                </td>
-                              
-                                <td class="tf-cart-item_total" cart-data-title="Total">
-                                  <input type="hidden"  class='price-item' id='total-${product.id}' value="${product.price}">
-                                    <div class="cart-total" id="cart-total-${product.id}">${product.price}  </div>
-                                </td>
-                                <td class="tf-mini-cart-remove remove-from-page-cart" data-product-id="${product.id}">
-                                   Remove
-                                </td>
-                            </tr>
-                        `;
-                            cartItemsHTML += cartItemHTML; // Append each item to the HTML string
-                        });
+                    // Loop through the products in the response
+                    response.products.forEach(function(product) {
+                        // Retrieve the unit and quantity from the cart data
+                        const productCartData = cart.find(item => item.productId === product.id);
+                        const unitId = productCartData ? productCartData.unitId : ''; // Get unitId from cart data
+                        const quantity = productCartData ? productCartData.quantity : 1; // Default quantity to 1 if not found
 
-                        cartItemsContainer.html(cartItemsHTML); // Inject cart items into the container
+                        // Find the unit from the units array based on the unitId
+                        const unit = response.units.find(unit => unit.id == unitId);
+
+                        // If unit is found, extract the unit name
+                        const unitName = unit ? unit.unit.name : '';
+
+                        const productImage = 'storage/' + (product.image || '');
+                        const cartItemHTML = `
+                    <tr class="tf-cart-item file-delete cart-item-checkout" id="cart-item-${product.id}" data-product-id="${product.id}">
+                        <td class="tf-cart-item_product">
+                            <a href="/product-detail/${product.slug}" class="img-box">
+                                <img src="{{asset('${productImage}')}}" alt="${product.name}">
+                            </a>
+                            <div class="cart-info">
+                                <a href="/product-detail/${product.id}" class="cart-title link">${product.name}</a>
+                            </div>
+                        </td>
+                        <td class="tf-cart-item_quantity" cart-data-title="Quantity">
+                            <div class="item_quantity d-flex justify-content-center">
+                                <input type="number" name="number" id="quantity-${product.id}" min="1" class="w-50 text-center" data-product-id="${product.id}" value="${quantity}">
+                            </div>
+                        </td>
+                        <td class="tf-cart-item_unit" cart-data-title="Unit">
+                            <span>${unitName}</span> <!-- Display unit -->
+                        </td>
+                        <td class="tf-mini-cart-remove remove-from-cart" data-product-id="${product.id}">
+                            Remove
+                        </td>
+                    </tr>
+                `;
+                        cartItemsHTML += cartItemHTML;
+                    });
+
+                    // Update the cart items in the table
+                    if (cartItemsHTML && $('.cart-items').length) {
+                        $('.cart-items').html(cartItemsHTML);
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error("Error fetching cart items:", status, error); // Log any errors
-                    emptyMessage.text("An error occurred while fetching your cart.");
-                }
+                    console.error("Error fetching cart items:", status, error);
+                },
             });
         }
 
-        updateCart();
 
+        updateCart(); // Call the function to load the cart
 
     });
+
     $(document).ready(function() {
         $(document).on('click', '.remove-from-page-cart', function() {
             const productId = $(this).data('product-id');
@@ -230,6 +221,7 @@ session()->forget('success');
         });
 
     });
+
     $(document).ready(function() {
         $(document).on("change", ".tf-cart-item_quantity input[type='number']", function() {
             const productId = $(this).data('product-id');
@@ -237,20 +229,11 @@ session()->forget('success');
                 $(this).val(1)
             }
             const quantity = $(this).val();
-            const price = $('#price-' + productId).val();
-            $('#total-' + productId).val(quantity * price);
-            $('#cart-total-' + productId).text((quantity * price).toFixed(2) + '  ');
             console.log(productId + 'Quantity changed');
-            let total = 0;
-            $('.cart-item-checkout').each(function(index, element) {
-                total += parseFloat($(element).find('.price-item').val());
-            });
-            // console.log(total)
-            $('.total_price').text(total.toFixed(2) + '  ');
         });
     });
-    $(document).ready(function() {
 
+    $(document).ready(function() {
         $("#btn-checkout").click(function(e) {
             // Show loader and disable the button
             if ($("#checkout-loader").is(":visible")) {
@@ -270,18 +253,13 @@ session()->forget('success');
             CartItem.each(function(index, element) {
                 const productId = $(element).data('product-id');
                 const quantity = $(element).find(`#quantity-${productId}`).val();
-                const total = $(element).find(`#total-${productId}`).val();
-                const size = $(element).find(`[name="size-${productId}"]:checked`).val() || 'size_made';
-                // const total_amount = $('#total_amount').val();
 
                 if (productId && quantity) {
                     AllProduct.push({
                         product_id: productId,
-                        quantity: quantity,
-                        size: size
+                        quantity: quantity
                     });
                 }
-                total_amount += parseFloat(total);
             });
 
             const formData = {
@@ -302,7 +280,6 @@ session()->forget('success');
                     if (response.success) {
                         Cookies.remove('cart');
                         window.location.href = '/cart';
-
                     }
                 },
                 error: function(xhr) {

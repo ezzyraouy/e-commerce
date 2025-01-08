@@ -21,4 +21,7 @@ class Product extends Model
     public function unit() {
         return $this->belongsTo(Unit::class,'unit_id');
     }
+    public function unitProducts() {
+        return $this->hasMany(UnitProduct::class,'product_id');
+    }
 }
