@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->integer('user_id'); 
             $table->integer('product_id'); 
+            $table->integer('unit_product_id'); 
             $table->integer('quantity'); 
             $table->string('size'); 
             $table->integer('order_id'); 

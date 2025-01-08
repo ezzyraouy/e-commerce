@@ -338,6 +338,87 @@
                     },
                 });
             });
+            $('#login-form').on('submit', function(e) {
+                e.preventDefault(); // Prevent the form from submitting the normal way
+
+                // Clear any existing alerts
+                $('#alert-placeholder-login').html('');
+
+                // Gather form data
+                const formData = {
+                    email: $('#email-login').val(),
+                    password: $('#password-login').val(),
+                    _token: '{{ csrf_token() }}' // Include CSRF token
+                };
+
+                // Send AJAX request
+                $.ajax({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    type: 'POST',
+                    url: '{{ route("loginFront") }}', // Laravel route for registration
+                    data: formData,
+                    success: function(response) {
+                        // Handle success (you can redirect or display a success message)
+                        Cookies.set('user_id', response.user.id)
+                        location.reload();
+                        // console.log(response.user.id)
+                        // $("#login .icon-close-popup").click()
+                        // $(document).ready(function() {
+                        //     // Append success alert message to the alert-login container
+                        //     $(".alert-login").append(`
+                        //         <div class="alert alert-success" role="alert">
+                        //             You have successfully logged in! You can now check out.
+                        //         </div>
+                        //     `);
+
+                        //     // Update the cart checkout button
+                        //     $("#btn-checkout").removeAttr('data-bs-toggle').attr('href', '#');
+                        //     $("#btn-checkout span").text('Checkout')
+                        //     updateMenuToLogout();
+                        // });
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle errors (display validation errors, etc.)
+                        let errors = xhr.responseJSON.errors;
+                        if (errors) {
+                            let errorMessages = '<div class="alert alert-danger alert-dismissible fade show" role="alert">';
+                            errorMessages += '<ul>';
+
+                            $.each(errors, function(key, value) {
+                                errorMessages += '<li>' + value[0] + '</li>'; // Show each error in a list
+                            });
+
+                            errorMessages += '</ul>';
+                            errorMessages += '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+                            errorMessages += '</div>';
+
+                            // Insert the Bootstrap alert with error messages into the placeholder
+                            $('#alert-placeholder-login').html(errorMessages);
+                        } else {
+                            // Generic error handling
+                            let genericError = '<div class="alert alert-danger alert-dismissible fade show" role="alert">';
+                            genericError += 'An error occurred, please try again.';
+                            genericError += '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+                            genericError += '</div>';
+
+                            $('#alert-placeholder-login').html(genericError);
+                        }
+                    }
+                });
+            });
+
+            function updateMenuToLogout() {
+                $(".nav-account").html(`
+                    <form method="POST" action="{{ route('logout') }}" id="logout-form">
+                        @csrf
+                        <button type="submit" class="nav-icon-item btn btn-link" style="border: none; background: none;">
+                            <i class="icon icon-account"></i> Logout
+                        </button>
+                    </form>
+                `);
+            }
         });
     </script>
 

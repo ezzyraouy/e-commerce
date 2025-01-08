@@ -22,14 +22,15 @@ class OrderController extends Controller
         foreach ($request->CartItem as $item) {
             $order->OrderItems()->create([
                 'user_id' => $input['user_id'],
+                'unit_product_id' => $item['unit_product_id'],
                 'product_id' => $item['product_id'],
                 'quantity' => $item['quantity'],
-                'size' => $item['size'],
+                // 'size' => $item['size'],
             ]);
         }
         session()->put('success', 'Your order has been successfully created!');
         try {
-            $order = Order::with(['user', 'OrderItems.product'])->findOrFail($order->id);
+            $order = Order::with(['user', 'OrderItems.product','OrderItems.UnitProduct.unit'])->findOrFail($order->id);
         
             Mail::to(env('ADMIN_EMAIL'))->send(new OrderMail($order));
             // Mail::to('a.ezzyraouy@directinvest.ma')->send(new OrderMail($order));

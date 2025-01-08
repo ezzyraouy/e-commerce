@@ -175,6 +175,7 @@ session()->forget('success');
                             </div>
                         </td>
                         <td class="tf-cart-item_unit" cart-data-title="Unit">
+                            <input type="hidden" name="number" id="unit_product-${product.id}"  data-unit_product-id="${unitId}"  data-product-id="${product.id}" value="${unitId}">
                             <span>${unitName}</span> <!-- Display unit -->
                         </td>
                         <td class="tf-mini-cart-remove remove-from-cart" data-product-id="${product.id}">
@@ -252,15 +253,17 @@ session()->forget('success');
             let user_id = '{{Auth::id()}}';
             CartItem.each(function(index, element) {
                 const productId = $(element).data('product-id');
+                const unit_product_id = $(element).find(`#unit_product-${productId}`).val();
                 const quantity = $(element).find(`#quantity-${productId}`).val();
-
-                if (productId && quantity) {
+                if (productId && quantity ) {
                     AllProduct.push({
                         product_id: productId,
+                        unit_product_id: unit_product_id,
                         quantity: quantity
                     });
                 }
             });
+    
 
             const formData = {
                 _token: '{{ csrf_token() }}', // Include CSRF token
