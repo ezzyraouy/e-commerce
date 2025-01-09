@@ -14,16 +14,16 @@ class ProductController extends Controller
      */
     public function index()
     {
-        return view('front-office.product.shop',['products'=>Product::latest()->paginate(9)]);
+        return view('front-office.product.shop', ['products' => Product::latest()->paginate(9)]);
     }
     public function indexCategorie($categorySlug)
     {
         $category = Category::whereSlug($categorySlug)->firstOrFail();
-    
+
         $products = Product::where('category_id', $category->id)
             ->latest()
             ->paginate(9);
-        return view('front-office.product.shop',['products'=>$products]);
+        return view('front-office.product.shop', ['products' => $products]);
     }
 
     /**
@@ -47,9 +47,9 @@ class ProductController extends Controller
      */
     public function show($slug)
     {
-        $product = Product::whereSlug($slug)->with('images','category')->first();
+        $product = Product::whereSlug($slug)->with('images', 'category')->first();
         $categories = Category::all();
-        return view('front-office.product.product-detail',['product'=>$product,'categories' => $categories]);
+        return view('front-office.product.product-detail', ['product' => $product, 'categories' => $categories]);
     }
 
     /**
@@ -78,7 +78,7 @@ class ProductController extends Controller
     public function search(Request $request)
     {
         $query = $request->input('query'); // Retrieve the search term
-        
+
         // Search products by name or description
         $products = Product::where('name', 'LIKE', "%{$query}%")
             ->orWhere('description', 'LIKE', "%{$query}%")
@@ -87,4 +87,23 @@ class ProductController extends Controller
         // Return a view with the search results
         return view('front-office.product.shop', compact('products', 'query'));
     }
+    public function search1(Request $request)
+    {
+        $query = $request->input('query'); // Retrieve the search term
+
+        // Search products by name or description
+        $products = Product::where('name', 'LIKE', "%{$query}%")
+            ->orWhere('description', 'LIKE', "%{$query}%")
+            ->with('unitProducts.unit') // Eager load relationships
+            ->get();
+
+        return response()->json(['products' => $products]);
+    }
+    
+    public function AllProducts()
+    {
+        $products = Product::latest()->take(9)->with('unitProducts.unit')->get();
+        return response()->json(['products' => $products]);
+    }
+
 }

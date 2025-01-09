@@ -41,56 +41,46 @@
             </thead>
             <tbody>
                 @if(old('units', $product->unitProducts ?? []))
-                @foreach(old('units', $product->unitProducts ?? []) as $index => $unitProduct)
-                <tr>
-                    <td>
-                        <select name="units[{{ $index }}][unit_id]" required>
-                            <option value="">Select unit</option>
-                            @foreach($units as $unit)
-                            <option value="{{ $unit->id }}"
-                                {{ old("units.{$index}.unit_id", $unitProduct->unit_id ?? '') == $unit->id ? 'selected' : '' }}>
-                                {{ $unit->name }}
-                            </option>
-                            @endforeach
-                        </select>
-                    </td>
-                    <td>
-                        <input
-                            type="number"
-                            name="units[{{ $index }}][quantity]"
-                            required
-                            min="1"
-                            value="{{ old("units.{$index}.quantity", $unitProduct->quantity ?? '') }}">
-                    </td>
-                    <td>
-                        <input
-                            type="number"
-                            step="0.01"
-                            name="units[{{ $index }}][price]"
-                            required
-                            min="0"
-                            value="{{ old("units.{$index}.price", $unitProduct->price ?? '') }}">
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-danger remove-unit">Remove</button>
-                    </td>
-                </tr>
-                @endforeach
+                    @foreach(old('units', $product->unitProducts ?? []) as $index => $unitProduct)
+                        <tr data-index="{{ $index }}">
+                            <td>
+                                <select name="units[{{ $index }}][unit_id]" required>
+                                    <option value="">Select unit</option>
+                                    @foreach($units as $unit)
+                                        <option value="{{ $unit->id }}"
+                                            {{ old("units.{$index}.unit_id", $unitProduct->unit_id ?? '') == $unit->id ? 'selected' : '' }}>
+                                            {{ $unit->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </td>
+                            <td>
+                                <input type="number" name="units[{{ $index }}][quantity]" required min="1"
+                                       value="{{ old("units.{$index}.quantity", $unitProduct->quantity ?? '') }}">
+                            </td>
+                            <td>
+                                <input type="number" step="0.01" name="units[{{ $index }}][price]" required min="0"
+                                       value="{{ old("units.{$index}.price", $unitProduct->price ?? '') }}">
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-danger remove-unit">Remove</button>
+                            </td>
+                        </tr>
+                    @endforeach
                 @else
-                <!-- Default empty row for adding a new product -->
-                <tr>
-                    <td>
-                        <select name="units[0][unit_id]" required>
-                            <option value="">Select unit</option>
-                            @foreach($units as $unit)
-                            <option value="{{ $unit->id }}">{{ $unit->name }}</option>
-                            @endforeach
-                        </select>
-                    </td>
-                    <td><input type="number" name="units[0][quantity]" required min="1"></td>
-                    <td><input type="number" step="0.01" name="units[0][price]" required min="0"></td>
-                    <td><button type="button" class="btn btn-danger remove-unit">Remove</button></td>
-                </tr>
+                    <tr data-index="0">
+                        <td>
+                            <select name="units[0][unit_id]" required>
+                                <option value="">Select unit</option>
+                                @foreach($units as $unit)
+                                    <option value="{{ $unit->id }}">{{ $unit->name }}</option>
+                                @endforeach
+                            </select>
+                        </td>
+                        <td><input type="number" name="units[0][quantity]" required min="1"></td>
+                        <td><input type="number" step="0.01" name="units[0][price]" required min="0"></td>
+                        <td><button type="button" class="btn btn-danger remove-unit">Remove</button></td>
+                    </tr>
                 @endif
             </tbody>
         </table>
@@ -98,19 +88,21 @@
     </fieldset>
 </div>
 
-
+@php
+    $unitIndex = isset($product) && isset($product->unitProducts) ? count($product->unitProducts) : 1;
+@endphp
 <script>
-    let unitIndex = 1;
-
+    let unitIndex = {{ $unitIndex }};
+    // Add unit row
     document.getElementById('add-unit').addEventListener('click', function() {
         const tableBody = document.querySelector('#units-table tbody');
         const newRow = `
-            <tr>
+            <tr data-index="${unitIndex}">
                 <td>
                     <select name="units[${unitIndex}][unit_id]" required>
                         <option value="">Select unit</option>
                         @foreach($units as $unit)
-                        <option value="{{ $unit->id }}">{{ $unit->name }}</option>
+                            <option value="{{ $unit->id }}">{{ $unit->name }}</option>
                         @endforeach
                     </select>
                 </td>
@@ -123,12 +115,40 @@
         unitIndex++;
     });
 
+    // Remove unit row
     document.querySelector('#units-table').addEventListener('click', function(event) {
         if (event.target.classList.contains('remove-unit')) {
-            event.target.closest('tr').remove();
+            const row = event.target.closest('tr');
+            row.remove();
+
+            // Re-index remaining rows after removal
+            const rows = document.querySelectorAll('#units-table tbody tr');
+            rows.forEach((row, index) => {
+                row.setAttribute('data-index', index);
+                const inputs = row.querySelectorAll('input, select');
+                inputs.forEach(input => {
+                    const name = input.name.replace(/\[\d+\]/, `[${index}]`);
+                    input.name = name;
+                });
+            });
+
+            unitIndex--; // Decrement index
         }
     });
+
+    // On form submission, reindex the units array
+    document.querySelector('form').addEventListener('submit', function() {
+        const rows = document.querySelectorAll('#units-table tbody tr');
+        rows.forEach((row, index) => {
+            const inputs = row.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                const name = input.name.replace(/\[\d+\]/, `[${index}]`);
+                input.name = name;
+            });
+        });
+    });
 </script>
+
 <fieldset class="name">
     <div class="body-title mb-10">Product title <span class="tf-color-1">*</span></div>
     <input class="mb-10" type="text" placeholder="Enter title" name="name" tabindex="0" value="{{ old('name', $product->name ?? '') }}" aria-required="true">

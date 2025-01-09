@@ -157,32 +157,33 @@ session()->forget('success');
 
                         // If unit is found, extract the unit name
                         const unitName = unit ? unit.unit.name : '';
+                        const unitquantity = unit ? unit.unit.quantity : '';
 
                         const productImage = 'storage/' + (product.image || '');
                         const cartItemHTML = `
-                    <tr class="tf-cart-item file-delete cart-item-checkout" id="cart-item-${product.id}" data-product-id="${product.id}">
-                        <td class="tf-cart-item_product">
-                            <a href="/product-detail/${product.slug}" class="img-box">
-                                <img src="{{asset('${productImage}')}}" alt="${product.name}">
-                            </a>
-                            <div class="cart-info">
-                                <a href="/product-detail/${product.id}" class="cart-title link">${product.name}</a>
-                            </div>
-                        </td>
-                        <td class="tf-cart-item_quantity" cart-data-title="Quantity">
-                            <div class="item_quantity d-flex justify-content-center">
-                                <input type="number" name="number" id="quantity-${product.id}" min="1" class="w-50 text-center" data-product-id="${product.id}" value="${quantity}">
-                            </div>
-                        </td>
-                        <td class="tf-cart-item_unit" cart-data-title="Unit">
-                            <input type="hidden" name="number" id="unit_product-${product.id}"  data-unit_product-id="${unitId}"  data-product-id="${product.id}" value="${unitId}">
-                            <span>${unitName}</span> <!-- Display unit -->
-                        </td>
-                        <td class="tf-mini-cart-remove remove-from-cart" data-product-id="${product.id}">
-                            Remove
-                        </td>
-                    </tr>
-                `;
+                        <tr class="tf-cart-item file-delete cart-item-checkout" id="cart-item-${product.id}" data-product-id="${product.id}">
+                            <td class="tf-cart-item_product">
+                                <a href="/product-detail/${product.slug}" class="img-box">
+                                    <img src="{{asset('${productImage}')}}" alt="${product.name}">
+                                </a>
+                                <div class="cart-info">
+                                    <a href="/product-detail/${product.id}" class="cart-title link">${product.name}</a>
+                                </div>
+                            </td>
+                            <td class="tf-cart-item_quantity" cart-data-title="Quantity">
+                                <div class="item_quantity d-flex justify-content-center">
+                                    <input type="number" name="number" id="quantity-${product.id}" min="1" class="w-50 text-center" data-product-id="${product.id}" value="${quantity}">
+                                </div>
+                            </td>
+                            <td class="tf-cart-item_unit" cart-data-title="Unit">
+                                <input type="hidden" name="number" id="unit_product-${product.id}"  data-unit_product-id="${unitId}"  data-product-id="${product.id}" value="${unitId}">
+                                <span>${unitName}(${unitquantity} per unit)</span> <!-- Display unit -->
+                            </td>
+                            <td class="tf-mini-cart-remove remove-from-cart" data-product-id="${product.id}">
+                                Remove
+                            </td>
+                        </tr>
+                    `;
                         cartItemsHTML += cartItemHTML;
                     });
 

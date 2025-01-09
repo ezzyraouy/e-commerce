@@ -68,6 +68,8 @@ Route::get('/checkout', [CheckoutController::class,'index']);
 Route::post('/checkout', [CheckoutController::class,'store']);
 
 Route::get('/products/search', [FrontProductController::class, 'search'])->name('products.search');
+Route::get('/products/search1', [FrontProductController::class, 'search1'])->name('products.search1');
+Route::get('/products/AllProducts', [FrontProductController::class, 'AllProducts'])->name('products.all');
 
 //Back Office
 Route::prefix('/admin')->middleware(['auth', 'admin'])->group(function () {

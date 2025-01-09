@@ -3831,7 +3831,8 @@ header.header-bg {
 }
 .tf-loading-default.loading,
 .tf-btn-loading.loading {
-  background-color: var(--main);
+  
+  /* background-color: rgb(231, 222, 222); */
 }
 .tf-loading-default.loading .icon,
 .tf-loading-default.loading i,

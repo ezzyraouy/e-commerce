@@ -294,6 +294,10 @@
                          <label class="tf-field-label" for="name">Full name</label>
                      </div>
                      <div class="tf-field style-1">
+                         <input class="tf-field-input w-100 tf-input" placeholder=" " type="text" name="Company_name" id="Company_name">
+                         <label class="tf-field-label" for="Company_name">Company Name</label>
+                     </div>
+                     <div class="tf-field style-1">
                          <input class="tf-field-input w-100 tf-input" placeholder=" " type="email" name="email" id="email">
                          <label class="tf-field-label" for="email">Email *</label>
                      </div>

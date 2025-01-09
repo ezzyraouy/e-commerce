@@ -85,9 +85,21 @@
             // Update Cart Modal
             window.updateCartModal = function() {
                 const cart = JSON.parse(Cookies.get('cart') || '[]'); // Get cart from cookies
+                cart.forEach((item) => {
+                    const btnaddprod = $('#btnaddprod' + item.productId);
+                    const quantityInput = $('#quantity-' + item.productId);
+                    const unitSelect = $('#unit-' + item.productId);
+
+                    btnaddprod.prop('checked', true);
+                    quantityInput.val(item.quantity);
+                    unitSelect.val(item.unitId); // This assumes that item.unitId exists and matches the unit ID in the dropdown
+                });
                 // Update cart count
-                if ($('#cart-count').length) {
-                    $('#cart-count').html(cart.length);
+                if ($('.cart-count').length) {
+                    $('.cart-count').html(cart.length);
+                }
+                if (cart.length==0) {
+                    $('.tf-mini-cart-items').html('');
                 }
                 $.ajax({
                     headers: {
@@ -157,21 +169,6 @@
 
 
 
-            // Remove from Cart
-            window.removeFromCart = function(productId) {
-                let cart = JSON.parse(Cookies.get('cart') || '[]');
-                const index = cart.indexOf(productId);
-                const btn = $('#btnaddprod' + productId);
-                if (btn.length) {
-                    btn.text('Quick Add to Cart');
-                }
-
-                cart.splice(index, 1);
-                Cookies.set('cart', JSON.stringify(cart), {
-                    path: '/',
-                });
-                location.reload();
-            };
 
             // Update Wishlist Count
             window.updateCount = function() {
@@ -229,13 +226,15 @@
 
             // Toggle Cart
             window.toggleCart = function(productId, unitId, quantity) {
+                // Parse the cart from cookies or initialize it as an empty array
                 let cart = JSON.parse(Cookies.get('cart') || '[]');
                 const cartItemIndex = cart.findIndex(item => item.productId === productId && item.unitId === unitId);
                 const btn = $('#btnaddprod' + productId);
-                console.log(cart);
+
                 if (cartItemIndex === -1) {
+                    // Add the product to the cart
                     if (btn.length) {
-                        btn.text('Remove from Cart');
+                        btn.prop('checked', true); // Set checkbox as checked
                     }
                     cart.push({
                         productId,
@@ -246,20 +245,22 @@
                         path: '/',
                     });
                     updateCartModal();
-                    if ($('#shoppingCart').length) {
-                        $('#shoppingCart').modal('show');
-                    }
+                    // if ($('#shoppingCart').length) {
+                    //     $('#shoppingCart').modal('show');
+                    // }
                 } else {
+                    // Remove the product from the cart
                     if (btn.length) {
-                        btn.text('Quick Add to Cart');
+                        btn.prop('checked', false); // Set checkbox as unchecked
                     }
                     cart.splice(cartItemIndex, 1);
                     Cookies.set('cart', JSON.stringify(cart), {
                         path: '/',
                     });
-                    location.reload();
+                    updateCartModal(); // Update the modal without reloading
                 }
             };
+
 
             // Event Handlers
             $(document).on('click', '.toggle-cart', function() {
@@ -267,13 +268,25 @@
                 const unitId = $(`#unit-${productId}`).val();
                 const quantity = $(`#quantity-${productId}`).val();
 
+                // Remove any previous error classes
+                $(`#unit-${productId}`).removeClass('is-invalid');
+                $(`#quantity-${productId}`).removeClass('is-invalid');
+
+                // Check for valid input
                 if (!unitId || !quantity || quantity <= 0) {
-                    alert('Please select a unit and enter a valid quantity.');
+                    // Add error class to the inputs
+                    if (!unitId) {
+                        $(`#unit-${productId}`).addClass('is-invalid');
+                    }
+                    if (!quantity || quantity <= 0) {
+                        $(`#quantity-${productId}`).addClass('is-invalid');
+                    }
                     return;
                 }
 
                 toggleCart(productId, unitId, quantity);
             });
+
 
             $(document).on('click', '.remove-from-cart', function() {
                 const productId = $(this).data('product-id');
@@ -284,6 +297,28 @@
                 const productId = $(this).data('product-id');
                 toggleWishlist(productId);
             });
+            // Remove from Cart
+            window.removeFromCart = function(productId) {
+                let cart = JSON.parse(Cookies.get('cart') || '[]'); // Retrieve cart from cookies or initialize as empty array
+                const index = cart.findIndex(item => item.productId === productId); // Find the product index by productId
+                const btn = $('#btnaddprod' + productId); // Get the checkbox button by productId
+
+                if (index !== -1) {
+                    cart.splice(index, 1); // Remove product from cart if found
+                }
+
+                if (btn.length) {
+                    btn.prop('checked', false); // Set checkbox as unchecked
+                }
+
+                // Save the updated cart back to the cookies
+                Cookies.set('cart', JSON.stringify(cart), {
+                    path: '/',
+                });
+
+                updateCartModal(); // Update the modal without reloading
+                updateCart();
+            };
 
             // Initial Updates
             updateCartModal();
@@ -300,6 +335,7 @@
                     email: $('#email').val(),
                     phone: $('#phone').val(),
                     address: $('#address').val(),
+                    Company_name: $('#Company_name').val(),
                     password: $('#password').val(),
                     password_confirmation: $('#password-confirm').val(),
                     _token: '{{ csrf_token() }}',

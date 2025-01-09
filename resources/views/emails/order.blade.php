@@ -1,51 +1,3 @@
-{{--Hello,
-
-You have received a new order with the following details:
-
-<table style="width: 100%; border-collapse: collapse; margin: 20px 0; border: 1px solid #ddd;">
-    <thead>
-        <tr>
-            <th style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f8f9fa;">Field</th>
-            <th style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f8f9fa;">Details</th>
-        </tr>
-    </thead>
-    <tbody>
-        <!-- Order Details -->
-        <tr>
-            <td style="border: 1px solid #ddd; padding: 8px; font-weight: bold;">Order ID</td>
-            <td style="border: 1px solid #ddd; padding: 8px;">{{ $order->id }}</td>
-</tr>
-
-<!-- Order Products -->
-<tr>
-    <td style="border: 1px solid #ddd; padding: 8px; font-weight: bold;">Order Products</td>
-    <td style="border: 1px solid #ddd; padding: 8px;">
-        <ul style="padding-left: 20px; margin: 0;">
-            @foreach($order->OrderItems as $item)
-            <li><strong>{{ $item->product->name }}</strong>
-            <li><strong>{{ $item->UnitProduct->unit->name }}</strong> (Quantity: {{ $item->quantity }})</li>
-            @endforeach
-        </ul>
-    </td>
-</tr>
-
-<!-- Customer Details -->
-<tr>
-    <td style="border: 1px solid #ddd; padding: 8px; font-weight: bold;">Customer Name</td>
-    <td style="border: 1px solid #ddd; padding: 8px;">{{ $order->user->name }}</td>
-</tr>
-<tr>
-    <td style="border: 1px solid #ddd; padding: 8px; font-weight: bold;">Phone</td>
-    <td style="border: 1px solid #ddd; padding: 8px;">{{ $order->user->phone }}</td>
-</tr>
-<tr>
-    <td style="border: 1px solid #ddd; padding: 8px; font-weight: bold;">Email</td>
-    <td style="border: 1px solid #ddd; padding: 8px;">{{ $order->user->email }}</td>
-</tr>
-</tbody>
-</table>
-
---}}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -58,6 +10,8 @@ You have received a new order with the following details:
 <body>
     <p>Hello,</p>
     <p>You have received a new order with the following details:</p>
+
+    <!-- HTML Table for Order Details -->
     <table style="width: 100%; border-collapse: collapse; margin: 20px 0; border: 1px solid #ddd; direction: ltr; text-align: center; font-family: Arial, sans-serif; font-size: 14px;">
         <thead>
             <tr style="background-color: #f8f9fa;">
@@ -78,7 +32,7 @@ You have received a new order with the following details:
             @endphp
             @foreach($order->OrderItems as $item)
             @php
-            $price = $item->product->price;
+            $price = $item->UnitProduct->price;
             $discount = $item->discount ?? 0;
             $tax = $item->tax ?? 0;
             $subtotal = ($price - $discount) * $item->quantity;
@@ -89,21 +43,25 @@ You have received a new order with the following details:
                 <td style="border: 1px solid #ddd; padding: 8px;">{{ $item->product->name }}</td>
                 <td style="border: 1px solid #ddd; padding: 8px;">{{ $item->UnitProduct->unit->name }}</td>
                 <td style="border: 1px solid #ddd; padding: 8px;">{{ $item->quantity }}</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">{{ number_format($price, 2) }} USD</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">{{ number_format($discount, 2) }} USD</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">{{ number_format($tax, 2) }} USD</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">{{ number_format($subtotal, 2) }} USD</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">{{ number_format($subtotal + $tax, 2) }} USD</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">{{ number_format($price, 2) }} SAR</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">{{ number_format($discount, 2) }} SAR</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">{{ number_format($tax, 2) }} SAR</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">{{ number_format($subtotal, 2) }} SAR</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">{{ number_format($subtotal + $tax, 2) }} SAR</td>
             </tr>
             @endforeach
             <tr style="font-weight: bold;">
                 <td colspan="8" style="border: 1px solid #ddd; padding: 8px; text-align: right;">Grand Total:</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">{{ number_format($total, 2) }} USD</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">{{ number_format($total, 2) }} SAR</td>
             </tr>
         </tbody>
     </table>
+
     <p>Thank you,</p>
     <p>Your Store Team</p>
+
+    <!-- Optional: Add instructions for the CSV file attachment -->
+    <p>Additionally, you can download the order details as an Excel-compatible CSV file attached to this email.</p>
 </body>
 
 </html>

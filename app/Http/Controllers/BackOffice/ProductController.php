@@ -122,7 +122,11 @@ class ProductController extends Controller
 
         // Delete units not in the request
         $unitsToDelete = array_diff($existingUnitProducts, $submittedUnitProductIds);
-        $product->unitProducts()->whereIn('id', $unitsToDelete)->delete();
+
+        // Check if there are units to delete before attempting to delete them
+        if (!empty($unitsToDelete)) {
+            $product->unitProducts()->whereIn('id', $unitsToDelete)->delete();
+        }
 
         // Process submitted units
         foreach ($request->input('units') as $unit) {
