@@ -36,7 +36,7 @@ class OrderMail extends Mailable
         foreach ($this->order->OrderItems as $item) {
             $price = $item->UnitProduct->price;
             $discount = $item->discount ?? 0;
-            $tax = $item->tax ?? 0;
+            $tax =  (($price - $discount) * $item->quantity) * 0.15;
             $subtotal = ($price - $discount) * $item->quantity;
             $total += $subtotal + $tax;
 

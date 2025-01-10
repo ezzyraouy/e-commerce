@@ -37,7 +37,7 @@
             </div>
             <div class="tf-page-cart-footer">
                 <div class="tf-cart-footer-inner">
-                    <div class="tf-free-shipping-bar">
+                    <div class="tf-free-shipping-bar" style="visibility: hidden;">
                         <div class="tf-progress-bar">
                             <span style="width: 50%;">
                                 <div class="progress-car">
@@ -47,9 +47,7 @@
                                 </div>
                             </span>
                         </div>
-                        <!-- <div class="tf-progress-msg">
-                            Buy <span class="price fw-6">$75.00</span> more to enjoy <span class="fw-6">Free Shipping</span>
-                        </div> -->
+                      
                     </div>
                     <div class="tf-page-cart-checkout">
 
@@ -172,7 +170,8 @@ session()->forget('success');
                             </td>
                             <td class="tf-cart-item_quantity" cart-data-title="Quantity">
                                 <div class="item_quantity d-flex justify-content-center">
-                                    <input type="number" name="number" id="quantity-${product.id}" min="1" class="w-50 text-center" data-product-id="${product.id}" value="${quantity}">
+                                    ${quantity}
+                                    <input type="hidden" name="number" id="quantity-${product.id}" min="1" class="w-50 text-center" data-product-id="${product.id}" value="${quantity}">
                                 </div>
                             </td>
                             <td class="tf-cart-item_unit" cart-data-title="Unit">
