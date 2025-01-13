@@ -40,10 +40,13 @@
             @foreach($products as $product)
             <!-- Add/Remove Button -->
             <div class=" product-item">
-                <div class="row">
-                    <div data-product-id="{{ $product->id }}" class="box-icon d-flex flex-column align-items-center w-auto quickview tf-btn-loading toggle-cart">
+                <div class="row mb-4">
+                    <p data-product-id="{{ $product->id }}" class="box-icon d-flex flex-column align-items-center w-auto quickview tf-btn-loading toggle-cart">
+                        <span id="btnaddprod{{ $product->id }}" class="btn btnaddprod">Quick Add to Cart</span>
+                    </p>
+                    <!-- <div data-product-id="{{ $product->id }}" class="box-icon d-flex flex-column align-items-center w-auto quickview tf-btn-loading toggle-cart">
                         <input type="checkbox" name="" id="btnaddprod{{ $product->id }}">
-                    </div>
+                    </div> -->
                 </div>
                 <div class="row align-items-center" style="margin-bottom: 30px;">
                     <div class="col-md-3 text-center">
@@ -58,7 +61,6 @@
                     <div class="col-md-3 text-center">
                         <label for="unit-{{ $product->id }}">Choose Unit:</label>
                         <select id="unit-{{ $product->id }}" class="form-select">
-                            <option value="" disabled selected>Select a unit</option>
                             @foreach($product->unitProducts as $unitProduct)
                             <option value="{{ $unitProduct->id }}">
                                 {{ $unitProduct->unit->name }} ({{ $unitProduct->quantity }} per unit)
@@ -68,7 +70,7 @@
                     </div>
                     <div class="col-md-3 text-center">
                         <label for="quantity-{{ $product->id }}">Quantity:</label>
-                        <input type="number" id="quantity-{{ $product->id }}" class="form-control" min="1">
+                        <input type="number" id="quantity-{{ $product->id }}" value="1" class="form-control" min="1">
                     </div>
                 </div>
             </div>
@@ -80,7 +82,7 @@
 
 <!-- Sticky View Cart Button -->
 <div class="view-cart-container">
-    <a href="/cart" class="btn-view-cart">Continue(<span class="count-box cart-count" id="cart-count"></span>)</a>
+    <a href="/cart" class="btn-view-cart" id="view-cart-container">Continue(<span class="count-box cart-count" id="cart-count"></span>)</a>
 </div>
 
 @section('css')
@@ -187,7 +189,7 @@
 
     .btn-view-cart {
         position: fixed;
-        bottom: 80px;
+        bottom: 20px;
         left: 50%;
         transform: translateX(-50%);
         background-color: var(--main);
@@ -201,7 +203,6 @@
         width: 70%;
     }
 
-
     .btn-view-cart:hover {
         background-color: #0056b3;
     }
@@ -209,10 +210,49 @@
     .view-cart-container {
         z-index: 10;
     }
+
+    /* Stop the button when the footer is reached */
+    .stop-sticky {
+        position: absolute;
+        bottom: 600px;
+    }
+
+    .btnaddprod,
+    .btnaddprod:hover {
+        color: white;
+        background-color: #000000;
+    }
+
+    @media only screen and (max-width: 800px) {
+        .btn-view-cart {
+            bottom: 80px;
+        }
+    }
 </style>
 @endsection
 
 @section('script')
+
+
+<script>
+    // JavaScript to make the button stop at the footer
+    document.addEventListener("DOMContentLoaded", function () {
+        const cartContainer = document.getElementById("view-cart-container");
+        const footer = document.getElementById("footer");
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    cartContainer.classList.add("stop-sticky");
+                } else {
+                    cartContainer.classList.remove("stop-sticky");
+                }
+            },
+            { root: null, threshold: 0, rootMargin: "0px" }
+        );
+
+        observer.observe(footer);
+    });
+</script>
 <script>
     $(document).ready(function() {
         const typingDelay = 300; // Delay after user stops typing (in ms)
@@ -272,10 +312,10 @@
                 products.forEach(product => {
                     const productHTML = `
                         <div class=" product-item">
-                            <div class="row">
-                                <div data-product-id="${product.id}" class="box-icon d-flex flex-column align-items-center w-auto quickview tf-btn-loading toggle-cart">
-                                    <input type="checkbox" name="" id="btnaddprod${product.id}">
-                                </div>
+                            <div class="row mb-4">
+                                 <p data-product-id="${product.id}" class="box-icon d-flex flex-column align-items-center w-auto quickview tf-btn-loading toggle-cart">
+                                    <span id="btnaddprod${product.id}" class="btn btnaddprod">Quick Add to Cart</span>
+                                </p>
                             </div>
                             <div class="row align-items-center">
                                 <div class="col-md-3 text-center">
@@ -288,7 +328,6 @@
                                 <div class="col-md-3 text-center">
                                     <label for="unit-${product.id}">Choose Unit:</label>
                                     <select id="unit-${product.id}" class="form-select">
-                                        <option value="" disabled selected>Select a unit</option>
                                         ${product.unit_products.map(unit => `
                                             <option value="${unit.id}">
                                                 ${unit.unit.name} (${unit.quantity})
@@ -298,7 +337,7 @@
                                 </div>
                                 <div class="col-md-3 text-center">
                                     <label for="quantity-${product.id}">Quantity:</label>
-                                    <input type="number" id="quantity-${product.id}" class="form-control" min="1">
+                                    <input type="number" id="quantity-${product.id}" class="form-control" value="1" min="1">
                                 </div>
                             </div>
                         </div>
@@ -312,7 +351,8 @@
                     const quantityInput = $('#quantity-' + item.productId);
                     const unitSelect = $('#unit-' + item.productId);
 
-                    btnaddprod.prop('checked', true);
+                    // btnaddprod.prop('checked', true);
+                    btnaddprod.text('Romove From Cart');
                     quantityInput.val(item.quantity);
                     unitSelect.val(item.unitId); // This assumes that item.unitId exists and matches the unit ID in the dropdown
                 });

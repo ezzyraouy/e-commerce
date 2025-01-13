@@ -90,7 +90,8 @@
                     const quantityInput = $('#quantity-' + item.productId);
                     const unitSelect = $('#unit-' + item.productId);
 
-                    btnaddprod.prop('checked', true);
+                    // btnaddprod.prop('checked', true);
+                    btnaddprod.text('Remove From to Cart');
                     quantityInput.val(item.quantity);
                     unitSelect.val(item.unitId); // This assumes that item.unitId exists and matches the unit ID in the dropdown
                 });
@@ -234,7 +235,8 @@
                 if (cartItemIndex === -1) {
                     // Add the product to the cart
                     if (btn.length) {
-                        btn.prop('checked', true); // Set checkbox as checked
+                        // btn.prop('checked', true); // Set checkbox as checked
+                        btn.text('Remove From to Cart');
                     }
                     cart.push({
                         productId,
@@ -251,7 +253,8 @@
                 } else {
                     // Remove the product from the cart
                     if (btn.length) {
-                        btn.prop('checked', false); // Set checkbox as unchecked
+                        // btn.prop('checked', false); // Set checkbox as unchecked
+                        btn.text('Quick Add to Cart');
                     }
                     cart.splice(cartItemIndex, 1);
                     Cookies.set('cart', JSON.stringify(cart), {
@@ -308,7 +311,8 @@
                 }
 
                 if (btn.length) {
-                    btn.prop('checked', false); // Set checkbox as unchecked
+                    // btn.prop('checked', false); // Set checkbox as unchecked
+                    btn.text('Quick Add to Cart');
                 }
 
                 // Save the updated cart back to the cookies

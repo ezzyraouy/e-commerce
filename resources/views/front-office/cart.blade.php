@@ -7,7 +7,7 @@
         <div class="tf-page-cart text-center mt_140 mb_200" id="empty">
             <h5 class="mb_24">Your cart is empty</h5>
             <p class="mb_24">You may check out all the available products and buy some in the shop</p>
-            <a href="/" class="tf-btn btn-sm radius-3 btn-fill btn-icon animate-hover-btn">Return to shop<i class="icon icon-arrow1-top-left"></i></a>
+            <a href="/shop" class="tf-btn btn-sm radius-3 btn-fill btn-icon animate-hover-btn">Return to shop<i class="icon icon-arrow1-top-left"></i></a>
         </div>
         <div class="tf-page-cart-wrap" id="cart-packed">
             <div class="tf-page-cart-item">

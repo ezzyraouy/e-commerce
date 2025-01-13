@@ -41,8 +41,8 @@
                         <th>ID</th>
                         <th>Product</th>
                         <th>Client</th>
-                        <th>Total</th>
-                        <th>Status</th>
+                        <!-- <th>Total</th> -->
+                        <!-- <th>Status</th> -->
                         <th>Date</th>
                     </tr>
                 </thead>
@@ -54,12 +54,12 @@
                             @foreach($order->orderItems as $item)
                             <span class="order-item" data-id="{{ $item->order_id }}">
                                 {{ $item->product->name }} * {{ $item->quantity }}
-                            </span><br>
+                            </span><br><br>
                             @endforeach
                         </td>
                         <td><span class="user" data-id="{{ $order->user->id }}">{{ $order->user->name }}</span></td>
-                        <td>{{ $order->total_amount }} USD</td>
-                        <td><span class="{{ $order->status }}">{{ $order->status }}</span></td>
+                        <!-- <td>{{ $order->total_amount }} USD</td> -->
+                        <!-- <td><span class="{{ $order->status }}">{{ $order->status }}</span></td> -->
                         <td>{{ $order->created_at }}</td>
                     </tr>
                     @endforeach
